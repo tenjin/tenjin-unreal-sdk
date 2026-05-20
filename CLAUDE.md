@@ -130,7 +130,7 @@ There are no scripts in this repo. Standard Unreal workflows apply:
   signal 6 before any Tenjin code runs. `Scripts/test-ios.sh` uses
   `-pak -package` so the `.app` is fully self-contained.
 - **The native iOS API does not match the React Native SDK's selectors
-  one-for-one.** Verified against TenjinSDK 1.16.1 headers:
+  one-for-one.** Verified against TenjinSDK 1.17.0 headers:
   `connectWithDeferredDeeplink:` takes an `NSURL*`; the ILRD passthroughs
   live in per-network category headers (`TenjinSDK+AdMobILRD.h` etc.) that
   must be `#import`ed separately; `registerDeepLinkHandler:` is an instance

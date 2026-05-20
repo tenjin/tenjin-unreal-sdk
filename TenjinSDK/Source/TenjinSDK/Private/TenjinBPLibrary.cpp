@@ -678,38 +678,11 @@ void UTenjinBPLibrary::EventAdImpressionAppLovin(const FString& JsonPayload)
 #endif
 }
 
-void UTenjinBPLibrary::EventAdImpressionHyperBid(const FString& JsonPayload)
+void UTenjinBPLibrary::EventAdImpressionCAS(const FString& JsonPayload)
 {
 #if PLATFORM_IOS
-	TenjinIOS::EventAdImpressionHyperBid(JsonPayload);
+	TenjinIOS::EventAdImpressionCAS(JsonPayload);
 #elif PLATFORM_ANDROID
-	AndroidImpressionJson("eventAdImpressionHyperBid", JsonPayload);
-#endif
-}
-
-void UTenjinBPLibrary::EventAdImpressionIronSource(const FString& JsonPayload)
-{
-#if PLATFORM_IOS
-	TenjinIOS::EventAdImpressionIronSource(JsonPayload);
-#elif PLATFORM_ANDROID
-	AndroidImpressionJson("eventAdImpressionIronSource", JsonPayload);
-#endif
-}
-
-void UTenjinBPLibrary::EventAdImpressionTopOn(const FString& JsonPayload)
-{
-#if PLATFORM_IOS
-	TenjinIOS::EventAdImpressionTopOn(JsonPayload);
-#elif PLATFORM_ANDROID
-	AndroidImpressionJson("eventAdImpressionTopOn", JsonPayload);
-#endif
-}
-
-void UTenjinBPLibrary::EventAdImpressionTradPlus(const FString& JsonPayload)
-{
-#if PLATFORM_IOS
-	TenjinIOS::EventAdImpressionTradPlus(JsonPayload);
-#elif PLATFORM_ANDROID
-	AndroidImpressionJson("eventAdImpressionTradPlus", JsonPayload);
+	AndroidImpressionJson("eventAdImpressionCAS", JsonPayload);
 #endif
 }

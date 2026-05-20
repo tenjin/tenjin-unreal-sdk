@@ -56,8 +56,6 @@ Build/*/**
 SourceArt/**/*.png
 SourceArt/**/*.tga
 
-# --- Bundled native dependencies (devs fetch via Scripts/install-ios-spm.sh) ---
-TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework/
 
 # --- Project-local config that should NOT be shared ---
 # (signing identities, API keys baked into ini, etc.)

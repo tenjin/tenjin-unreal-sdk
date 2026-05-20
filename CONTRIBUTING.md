@@ -9,6 +9,7 @@ End-user integration docs live in [README.md](README.md).
 * [Repository layout](#layout)
 * [Architecture](#architecture)
 * [Dependency management](#deps)
+* [Packaging and on-device testing](#packaging)
 * [Adding a new SDK method](#adding-method)
 * [Known dependency conflicts](#conflicts)
 * [Releasing](#releasing)
@@ -20,10 +21,9 @@ tenjin-unreal-sdk/
 ├── README.md                       # user-facing docs
 ├── CONTRIBUTING.md                 # this file
 ├── CLAUDE.md                       # guidance for AI coding agents
-├── UNREAL-RESEARCH.md              # design / feasibility research
+├── CHANGELOG.md                    # version history
 ├── LICENSE                         # MIT
 ├── Scripts/                        # install + test helpers
-│   ├── install-ios-spm.sh
 │   ├── test-android.sh
 │   └── test-ios.sh
 ├── TenjinSDK/                      # The plugin — drop into <Project>/Plugins/
@@ -151,17 +151,86 @@ needed.
 
 ### Bumping the iOS SDK version
 
+The iOS xcframework is committed to the repo at
+`TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework/` so cloning + building is
+one step (no fetch script). To bump:
+
+1. Download the new `TenjinSDK.xcframework` from
+   [tenjin-ios-sdk releases][ios-releases] (or extract it from a CocoaPods
+   install with `pod 'TenjinSDK', '<new-version>'` in a scratch project).
+2. Replace the entire `TenjinSDK.xcframework/` folder.
+3. Run `./Scripts/test-ios.sh` to verify the iOS package still builds and
+   signs cleanly.
+4. Bump the version string in
+   [`TenjinSDK/ThirdParty/iOS/README.md`](TenjinSDK/ThirdParty/iOS/README.md)
+   and [`CHANGELOG.md`](CHANGELOG.md).
+5. Commit the new framework binary alongside the doc changes. `.gitattributes`
+   already marks `*.xcframework/**` as binary so git won't try to LF-normalize.
+
+Why static vs SPM? Earlier the iOS dep was resolved via
+[`tenjin-ios-spm`](https://github.com/tenjin/tenjin-ios-spm), but that repo
+lags behind the main iOS SDK's release cadence (latest SPM tag at time of
+writing is `1.16.1` while the iOS SDK has shipped `1.17.0+`). Committing
+the framework lets us pin to any version that has a release on
+[`tenjin-ios-sdk`](https://github.com/tenjin/tenjin-ios-sdk/releases); the
+cost is a ~21 MB binary in the repo.
+
+[ios-releases]: https://github.com/tenjin/tenjin-ios-sdk/releases
+
+## <a id="packaging"></a>Packaging and on-device testing
+
+Both helper scripts wrap UnrealBuildTool's `RunUAT BuildCookRun` with the
+device/log glue UE doesn't ship. They auto-locate the engine under
+`/Users/Shared/Epic Games/UE_5.7…5.3` (override with `UE_ROOT`) and default
+to the `Development` client config.
+
+### iOS — `Scripts/test-ios.sh`
+
 ```bash
-./Scripts/install-ios-spm.sh 1.16.1      # pin to a specific version
-./Scripts/install-ios-spm.sh --force     # re-resolve over an existing one
+./Scripts/test-ios.sh                      # package a signed .ipa (no device needed)
+./Scripts/test-ios.sh --deploy             # also install + launch on a tethered device
+./Scripts/test-ios.sh --deploy --device <hardware-UDID>
+./Scripts/test-ios.sh --no-package         # skip the build, just print next steps
 ```
 
-The script runs `swift package resolve` against
-<https://github.com/tenjin/tenjin-ios-spm>, locates the resolved
-`TenjinSDK.xcframework` in SPM's build cache, and copies it into
-`TenjinSDK/ThirdParty/iOS/`. UE's `Build.cs` references that static path —
-the script is the bridge between SPM resolution and UBT's
-`PublicAdditionalFrameworks` primitive.
+Packages with `-build -cook -stage -pak -package -archive`, so the resulting
+`.app` is fully self-contained (no Zen content streaming). With `--deploy`
+the script appends `-deploy -run -device=IOS@<UDID>`, which deploys via
+`xcrun devicectl device process launch --terminate-existing --console`
+— the `--console` flag streams the device log to your terminal until you
+Ctrl-C. The UDID is auto-detected from
+`xcrun devicectl list devices --json-output -` (filtering for
+`platform == "iOS"` and `tunnelState == "connected"`); pass `--device` to
+override.
+
+Signing is configured in `Sample/TenjinSample/Config/DefaultEngine.ini`
+under `[/Script/MacTargetPlatform.XcodeProjectSettings]` (Modern Xcode
+workflow). After editing signing values, delete
+`Sample/TenjinSample/Intermediate/ProjectFilesIOS/` so the generated
+`.xcconfig` is rebuilt — a plain rebuild reuses the cached xcconfig.
+
+### Android — `Scripts/test-android.sh`
+
+```bash
+./Scripts/test-android.sh                     # package, install, launch, tail logcat
+./Scripts/test-android.sh --device <serial>   # pick a specific adb device
+./Scripts/test-android.sh --no-package        # skip build, only install/launch
+```
+
+Packages with `-pak -package` (so content is baked into the APK and the
+device doesn't depend on a Zen server), then `adb install -r`,
+`adb shell am start -n com.tenjin.unreal.sample/com.epicgames.unreal.GameActivity`,
+then `adb logcat` filtered to `TenjinSDKBridge:V TenjinSDK:V Tenjin:V
+LogTenjin:V LogTemp:V UE:V AndroidRuntime:E *:S`. The script
+prepends `~/Library/Android/sdk/platform-tools` (and a couple of fallbacks)
+to PATH if `adb` isn't already there.
+
+UE 5.7's Android build needs NDK `r27c` (= `27.2.12479018`), JDK 17, and
+the `cmdline-tools/latest/bin/sdkmanager` binary; run
+`Engine/Extras/Android/SetupAndroid.command` once with
+`STUDIO_SDK_PATH=$HOME/Library/Android/sdk` to install/align all of those
+and write `ANDROID_HOME`/`NDKROOT`/`JAVA_HOME` exports into your shell
+profile.
 
 ## <a id="adding-method"></a>Adding a new SDK method
 
@@ -235,9 +304,11 @@ When upstream adds a method:
 1. Bump the version in `TenjinSDK/TenjinSDK.uplugin` (`Version` and
    `VersionName`).
 2. Bump the native SDK versions:
-   * Android: edit `TenjinSDK_UPL_Android.xml`.
-   * iOS: re-run `Scripts/install-ios-spm.sh <new-version>` and verify
-     a Sample build links.
+   * Android: edit the `implementation 'com.tenjin:android-sdk:X.Y.Z'`
+     line in `TenjinSDK/Source/TenjinSDK/TenjinSDK_UPL_Android.xml`.
+   * iOS: replace `TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework/` with
+     the new release (see `ThirdParty/iOS/README.md`) and verify a
+     Sample build links.
 3. Tag the release on GitHub matching the underlying native SDK
    `major.minor`.
 4. Smoke-test the Sample app on at least one iOS and one Android device.

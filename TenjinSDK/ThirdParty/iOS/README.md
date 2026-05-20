@@ -1,54 +1,27 @@
 # iOS TenjinSDK xcframework
 
-`TenjinSDK.Build.cs` links whatever sits at
-`TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework`. There are three ways to
-populate it; pick one.
+`TenjinSDK.Build.cs` links `TenjinSDK.xcframework` from this folder via UE's
+`PublicAdditionalFrameworks`. The framework is **committed to the repository**
+so cloning + building the plugin is one step — no fetch needed.
 
-## 1. Swift Package Manager (recommended)
+## Current bundled version
 
-```bash
-./Scripts/install-ios-spm.sh             # latest pinned version
-./Scripts/install-ios-spm.sh 1.16.1      # pin a specific version
-./Scripts/install-ios-spm.sh --force     # re-resolve over an existing one
-```
+The xcframework currently committed here is **TenjinSDK 1.17.0**.
 
-The script runs `swift package resolve` against
-<https://github.com/tenjin/tenjin-ios-spm>, locates the resolved
-`TenjinSDK.xcframework` in SPM's build cache, and copies it here.
+## Bumping the version
 
-Why a script rather than a `Build.cs` integration? UnrealBuildTool has no
-`SwiftPackage` primitive — every iOS UE plugin that depends on a vendored
-SDK uses either a script (Adjust) or a checked-in xcframework (AppsFlyer).
-The script approach gets SPM's checksum verification and one-line version
-bumps without fighting UBT.
+1. Download the new `.xcframework` from
+   [tenjin-ios-sdk releases](https://github.com/tenjin/tenjin-ios-sdk/releases)
+   (or extract it from a CocoaPods install with `pod 'TenjinSDK', '<new-version>'`
+   in a scratch project).
+2. Replace the entire `TenjinSDK.xcframework/` folder here.
+3. Verify the iOS build still compiles (`./Scripts/test-ios.sh` will do a
+   full clean iOS package).
+4. Bump the version reference in this README and in
+   [`CHANGELOG.md`](../../../CHANGELOG.md).
+5. Commit the new framework binary alongside the version-bump docs.
 
-## 2. Direct download
-
-Grab the latest release from
-<https://github.com/tenjin/tenjin-ios-sdk/releases>, extract
-`TenjinSDK.xcframework/` here so the layout is:
-
-```
-TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework/
-    Info.plist
-    ios-arm64/...
-    ios-arm64_x86_64-simulator/...
-```
-
-## 3. CocoaPods (manual)
-
-Run `pod install` against this Podfile snippet in a scratch dir, then copy
-`TenjinSDK.xcframework` out of `Pods/TenjinSDK/`:
-
-```ruby
-platform :ios, '15.0'
-target 'Scratch' do
-  use_frameworks!
-  pod 'TenjinSDK', '1.16.1'
-end
-```
-
----
-
-The folder is `.gitignore`d so the resolved framework is not committed.
-Each developer (or CI job) re-runs the install step.
+That's it — the plugin source already imports the eight ILRD category
+headers; new networks bundled by a future TenjinSDK release will need a
+small addition to `Private/iOS/TenjinSDK_iOS.mm` (the `#import` line) and
+`Public/TenjinBPLibrary.h` (a new `EventAdImpressionXXX` method).

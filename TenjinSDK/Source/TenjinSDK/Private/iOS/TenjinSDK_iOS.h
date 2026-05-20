@@ -61,10 +61,7 @@ namespace TenjinIOS
 
 	void EventAdImpressionAdMob(const FString& Json);
 	void EventAdImpressionAppLovin(const FString& Json);
-	void EventAdImpressionHyperBid(const FString& Json);
-	void EventAdImpressionIronSource(const FString& Json);
-	void EventAdImpressionTopOn(const FString& Json);
-	void EventAdImpressionTradPlus(const FString& Json);
+	void EventAdImpressionCAS(const FString& Json);
 }
 
 #endif

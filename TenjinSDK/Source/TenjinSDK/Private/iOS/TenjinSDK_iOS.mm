@@ -6,13 +6,11 @@
 
 #import <Foundation/Foundation.h>
 #import <TenjinSDK/TenjinSDK.h>
-// ILRD passthroughs live in per-network category headers, not the main class.
+// ILRD passthroughs live in per-network category headers, not the main
+// class. Only networks that ship an Unreal Engine plugin are exposed.
 #import <TenjinSDK/TenjinSDK+AdMobILRD.h>
 #import <TenjinSDK/TenjinSDK+AppLovinILRD.h>
-#import <TenjinSDK/TenjinSDK+HyperBidILRD.h>
-#import <TenjinSDK/TenjinSDK+IronSourceILRD.h>
-#import <TenjinSDK/TenjinSDK+TopOnILRD.h>
-#import <TenjinSDK/TenjinSDK+TradPlusILRD.h>
+#import <TenjinSDK/TenjinSDK+CASILRD.h>
 
 namespace
 {
@@ -225,12 +223,9 @@ void ResetUserProfile()
 	[TenjinSDK resetUserProfile];
 }
 
-void EventAdImpressionAdMob(const FString& Json)        { [TenjinSDK adMobImpressionFromJSON:ToNSString(Json)]; }
-void EventAdImpressionAppLovin(const FString& Json)     { [TenjinSDK appLovinImpressionFromJSON:ToNSString(Json)]; }
-void EventAdImpressionHyperBid(const FString& Json)     { [TenjinSDK hyperBidImpressionFromJSON:ToNSString(Json)]; }
-void EventAdImpressionIronSource(const FString& Json)   { [TenjinSDK ironSourceImpressionFromJSON:ToNSString(Json)]; }
-void EventAdImpressionTopOn(const FString& Json)        { [TenjinSDK topOnImpressionFromJSON:ToNSString(Json)]; }
-void EventAdImpressionTradPlus(const FString& Json)     { [TenjinSDK tradPlusImpressionFromJSON:ToNSString(Json)]; }
+void EventAdImpressionAdMob(const FString& Json)    { [TenjinSDK adMobImpressionFromJSON:ToNSString(Json)]; }
+void EventAdImpressionAppLovin(const FString& Json) { [TenjinSDK appLovinImpressionFromJSON:ToNSString(Json)]; }
+void EventAdImpressionCAS(const FString& Json)      { [TenjinSDK casImpressionFromJSON:ToNSString(Json)]; }
 
 } // namespace TenjinIOS
 

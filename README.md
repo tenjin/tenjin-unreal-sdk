@@ -2,10 +2,14 @@
 
 ## Summary
 
-The Tenjin Unreal Plugin allows users to track installs, events, in-app
-purchases, subscriptions, attribution and ad-revenue impressions in their
-iOS and Android Unreal Engine apps. To learn more about Tenjin and our
-product offering, please visit <https://www.tenjin.com>.
+The Unreal Engine SDK for Tenjin. To learn more about Tenjin and our product
+offering, please visit <https://www.tenjin.com>.
+
+* The Tenjin Unreal SDK supports both iOS and Android.
+* Review the [iOS][tenjin-ios] and [Android][tenjin-android] documentation
+  and apply the proper platform settings to your builds.
+* See the [CHANGELOG](CHANGELOG.md) for detailed version history.
+* For any issues or support, please contact <support@tenjin.com>.
 
 ## Table of contents
 
@@ -16,23 +20,24 @@ product offering, please visit <https://www.tenjin.com>.
   * [Configure the plugin](#sdk-configure)
   * [Initialize and connect](#sdk-init)
 * [Additional features](#additional-features)
-  * [Send events](#send-events)
-  * [Track in-app purchases](#track-iap)
-  * [Track subscriptions](#track-subscriptions)
-  * [Get attribution info](#get-attribution-info)
+  * [Custom events](#send-events)
+  * [Purchase events](#track-iap)
+  * [Subscription tracking](#track-subscriptions)
+  * [LiveOps Campaigns (attribution)](#get-attribution-info)
   * [Deep links](#deep-links)
-  * [User profile / LiveOps metrics](#user-profile)
+  * [User Profile — LiveOps Metrics](#user-profile)
   * [Customer User ID](#customer-user-id)
   * [Analytics Installation ID](#analytics-installation-id)
-  * [Append app subversion](#append-app-subversion)
-  * [Cache events / encrypt requests](#cache-encrypt)
-  * [Privacy: opt-in / opt-out](#privacy-opt)
-  * [Privacy: Google DMA](#privacy-dma)
-  * [Privacy: CMP](#privacy-cmp)
-  * [SKAdNetwork (iOS)](#skadnetwork)
+  * [App Subversion](#append-app-subversion)
+  * [Retry/cache events](#cache-encrypt)
+  * [GDPR (opt-in / opt-out)](#privacy-opt)
+  * [Google DMA parameters](#privacy-dma)
+  * [Opt in/out using CMP](#privacy-cmp)
+  * [SKAdNetwork and Conversion Values (iOS)](#skadnetwork)
   * [Impression-Level Ad Revenue (ILRD)](#ilrd)
-  * [Android app store (Google Play / Amazon)](#app-store)
+  * [App Store (Google Play / Amazon / Other)](#app-store)
 * [Sample app](#sample-app)
+* [Testing](#testing)
 * [Engine version support](#engine-support)
 * [Support](#support)
 * [License](#license)
@@ -44,7 +49,7 @@ product offering, please visit <https://www.tenjin.com>.
   before installing the plugin — UE compiles the plugin's C++ at package time)
 * iOS 15+ deployment target
 * Android `minSdkVersion` 23+, `compileSdkVersion` / `targetSdkVersion` 34
-* A Tenjin API key from the [Tenjin dashboard][tenjin-dashboard]
+* A Tenjin SDK key from the [Tenjin dashboard][tenjin-dashboard]
 
 ## <a id="basic-integration"></a>Basic integration
 
@@ -62,24 +67,19 @@ submodule. Releases are tagged on GitHub.
    <YourProject>/Plugins/TenjinSDK/
    ```
 
-2. **iOS only** — fetch the `TenjinSDK.xcframework` via Swift Package Manager:
+2. **No manual native-dep setup needed.** Both native SDKs are wired up
+   automatically:
+   * **iOS** — `TenjinSDK.xcframework` is committed under
+     `Plugins/TenjinSDK/ThirdParty/iOS/` and linked via
+     `PublicAdditionalFrameworks` in `Build.cs`. Bundled version is
+     **TenjinSDK 1.17.0**. To bump, replace the framework folder per
+     [`ThirdParty/iOS/README.md`][thirdparty-readme].
+   * **Android** — the plugin's UPL XML injects
+     `implementation 'com.tenjin:android-sdk:1.18.0'` into the generated
+     Gradle build at package time; Gradle pulls from Maven Central during
+     the build.
 
-   ```bash
-   ./Scripts/install-ios-spm.sh             # latest pinned version
-   ./Scripts/install-ios-spm.sh 1.16.1      # or pin to a specific version
-   ```
-
-   The script runs `swift package resolve` against
-   <https://github.com/tenjin/tenjin-ios-spm> and copies the resolved
-   `.xcframework` into `Plugins/TenjinSDK/ThirdParty/iOS/`. See
-   [`TenjinSDK/ThirdParty/iOS/README.md`][thirdparty-readme] for manual
-   alternatives (direct download or CocoaPods).
-
-3. **Android** needs no extra step — the plugin's UPL XML injects
-   `implementation 'com.tenjin:android-sdk'` into the generated Gradle build
-   at package time, pulling the library from Maven Central.
-
-4. Add `TenjinSDK` to your game module's `Build.cs`:
+3. Add `TenjinSDK` to your game module's `Build.cs`:
 
    ```cs
    PublicDependencyModuleNames.AddRange(new string[] {
@@ -87,10 +87,10 @@ submodule. Releases are tagged on GitHub.
    });
    ```
 
-5. Right-click your `.uproject` and choose *Generate project files*, then
+4. Right-click your `.uproject` and choose *Generate project files*, then
    build the project once. The plugin compiles alongside your game module.
 
-6. Enable the plugin in *Edit → Plugins → Analytics → Tenjin SDK*. It
+5. Enable the plugin in *Edit → Plugins → Analytics → Tenjin SDK*. It
    auto-enables when listed in your `.uproject`.
 
 ### <a id="sdk-configure"></a>Configure the plugin
@@ -100,7 +100,7 @@ Tenjin SDK*:
 
 | Setting | Purpose |
 |---------|---------|
-| `SdkKey` | Your dashboard API key |
+| `SdkKey` | Your dashboard SDK key |
 | `AttUsageDescription` | iOS ATT prompt text (injected into `Info.plist`) |
 | `AndroidAppStore` | `googleplay` / `amazon` / `other` |
 | `bAutoInitialize` | If `true`, the plugin auto-initializes during module startup |
@@ -166,7 +166,7 @@ static void Connect();
 
 Once the SDK is initialized you can use any of the methods below.
 
-### <a id="send-events"></a>Send events
+### <a id="send-events"></a>Custom events
 
 Track a named event:
 
@@ -193,7 +193,7 @@ UTenjinBPLibrary::EventWithNameAndValue(TEXT("coins_earned"), 250);
 
 Limits: event name ≤ 80 characters, ≤ 500 unique event names per app.
 
-### <a id="track-iap"></a>Track in-app purchases
+### <a id="track-iap"></a>Purchase events
 
 Generic transaction (no receipt):
 
@@ -226,7 +226,7 @@ static void TransactionWithDataSignature(const FString& ProductName,
                                          const FString& DataSignature);
 ```
 
-### <a id="track-subscriptions"></a>Track subscriptions
+### <a id="track-subscriptions"></a>Subscription tracking (iOS only)
 
 ```cpp
 UFUNCTION(BlueprintCallable, Category = "Tenjin|Transactions")
@@ -257,7 +257,13 @@ static void SubscriptionWithStoreKit(const FString& ProductId,
 > subscription API. `Subscription(...)` is a no-op on Android until upstream
 > support lands.
 
-### <a id="get-attribution-info"></a>Get attribution info
+### <a id="get-attribution-info"></a>LiveOps Campaigns (attribution)
+
+Tenjin supports retrieving user attribution information — sourcing ad
+network, campaign, creative, etc. — directly from the SDK. This lets you
+tie attribution to in-game data per device, or show different content
+depending on the install source. Bind a UFUNCTION on a UObject and pass it
+to `GetAttributionInfo` (dynamic delegates can't bind to lambdas):
 
 ```cpp
 UFUNCTION(BlueprintCallable, Category = "Tenjin|Attribution")
@@ -266,16 +272,13 @@ static void GetAttributionInfo(const FTenjinAttributionInfoDelegate& Callback);
 
 ```cpp
 FTenjinAttributionInfoDelegate Cb;
-Cb.BindLambda([](bool bSuccess, const FString& Json)
-{
-    UE_LOG(LogTemp, Display, TEXT("Attribution: %s"), *Json);
-});
+Cb.BindUFunction(Listener, FName(TEXT("HandleAttributionInfo")));
 UTenjinBPLibrary::GetAttributionInfo(Cb);
 ```
 
-`Json` is the raw attribution payload (ad_network, campaign_id, campaign_name,
-site_id, creative_name, etc.). Attribution Info is a paid Tenjin feature —
-please contact your Tenjin account manager if you are interested.
+`Json` is the raw payload — `ad_network`, `campaign_id`, `campaign_name`,
+`site_id`, `creative_name`, etc. **LiveOps Campaigns is a paid Tenjin
+feature** — contact your Tenjin account manager to enable it.
 
 ### <a id="deep-links"></a>Deep links
 
@@ -297,7 +300,7 @@ void UMyClass::HandleDeepLink(const FString& JsonPayload)
 }
 ```
 
-### <a id="user-profile"></a>User profile / LiveOps metrics
+### <a id="user-profile"></a>User Profile — LiveOps Metrics
 
 Tenjin automatically tracks per-user engagement metrics (session count,
 session length, IAP totals by currency, ad revenue by network).
@@ -343,7 +346,7 @@ UFUNCTION(BlueprintCallable, Category = "Tenjin|User")
 static void GetAnalyticsInstallationId(const FTenjinStringDelegate& Callback);
 ```
 
-### <a id="append-app-subversion"></a>Append app subversion
+### <a id="append-app-subversion"></a>App Subversion
 
 Track sub-versions of your app — useful for A/B testing builds within the
 same store version.
@@ -353,7 +356,7 @@ UFUNCTION(BlueprintCallable, Category = "Tenjin|Config")
 static void AppendAppSubversion(int32 Subversion);
 ```
 
-### <a id="cache-encrypt"></a>Cache events / encrypt requests
+### <a id="cache-encrypt"></a>Retry/cache events
 
 ```cpp
 UFUNCTION(BlueprintCallable, Category = "Tenjin|Config")
@@ -366,7 +369,7 @@ static void SetEncryptRequestsSetting(bool bSetting);
 `SetCacheEventSetting(true)` enables retry-on-failure for events sent while
 the device is offline.
 
-### <a id="privacy-opt"></a>Privacy: opt-in / opt-out
+### <a id="privacy-opt"></a>GDPR (opt-in / opt-out)
 
 ```cpp
 UTenjinBPLibrary::OptIn();
@@ -375,7 +378,7 @@ UTenjinBPLibrary::OptInParams(TArray<FString>{TEXT("country"), TEXT("device_id")
 UTenjinBPLibrary::OptOutParams(TArray<FString>{TEXT("country"), TEXT("device_id")});
 ```
 
-### <a id="privacy-dma"></a>Privacy: Google DMA
+### <a id="privacy-dma"></a>Google DMA parameters
 
 ```cpp
 UFUNCTION(BlueprintCallable, Category = "Tenjin|Privacy")
@@ -385,7 +388,7 @@ UTenjinBPLibrary::OptInGoogleDMA();
 UTenjinBPLibrary::OptOutGoogleDMA();
 ```
 
-### <a id="privacy-cmp"></a>Privacy: CMP
+### <a id="privacy-cmp"></a>Opt in/out using CMP
 
 Drive opt-in/opt-out from the IAB TCF v2 consent string emitted by your CMP:
 
@@ -393,7 +396,7 @@ Drive opt-in/opt-out from the IAB TCF v2 consent string emitted by your CMP:
 UTenjinBPLibrary::OptInOutUsingCMP();
 ```
 
-### <a id="skadnetwork"></a>SKAdNetwork (iOS)
+### <a id="skadnetwork"></a>SKAdNetwork and Conversion Values (iOS)
 
 iOS SKAdNetwork postback updates. Pre-iOS-16.1 SDKs ignore `CoarseValue` and
 `bLockWindow`.
@@ -414,9 +417,10 @@ static void UpdatePostbackConversionValueWithCoarseValue(
 
 ### <a id="ilrd"></a>Impression-Level Ad Revenue (ILRD)
 
-Tenjin accepts impression-level ad revenue from AppLovin, IronSource /
-LevelPlay, AdMob, TopOn, HyperBid, TradPlus. Serialise the network's
-impression dictionary to JSON and hand it over:
+ILRD passthroughs are exposed only for ad mediation platforms that ship
+an Unreal Engine plugin (otherwise there's no realistic way for a UE app
+to obtain the impression JSON). Serialise the network's impression
+dictionary to JSON in your app code and hand it to the matching method:
 
 ```cpp
 UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
@@ -426,25 +430,32 @@ UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
 static void EventAdImpressionAppLovin(const FString& JsonPayload);
 
 UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-static void EventAdImpressionHyperBid(const FString& JsonPayload);
-
-UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-static void EventAdImpressionIronSource(const FString& JsonPayload);
-
-UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-static void EventAdImpressionTopOn(const FString& JsonPayload);
-
-UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-static void EventAdImpressionTradPlus(const FString& JsonPayload);
+static void EventAdImpressionCAS(const FString& JsonPayload);
 ```
+
+Supported networks and their UE plugins:
+
+| Network | UE plugin |
+|---------|-----------|
+| **AppLovin MAX** | [AppLovin/AppLovin-MAX-Unreal](https://github.com/AppLovin/AppLovin-MAX-Unreal) |
+| **Google AdMob** | Community / marketplace UE plugins (no official Google plugin) |
+| **CAS** (Clever Ads Solutions) | [cleveradssolutions/CAS-Unreal](https://github.com/cleveradssolutions/CAS-Unreal) |
+
+The other ILRD networks supported by Tenjin's native iOS/Android SDKs
+(IronSource / Unity LevelPlay, HyperBid, TopOn, TradPlus, CloudX) ship
+only Unity SDKs at this time, so they're intentionally omitted here. If
+upstream publishes a UE plugin for any of them, the corresponding method
+is one drop-in addition — the Tenjin native side already supports it.
 
 > ILRD is a paid Tenjin feature — please contact your Tenjin account
 > manager before sending ILRD events in production.
 
-### <a id="app-store"></a>Android app store (Google Play / Amazon)
+### <a id="app-store"></a>App Store (Google Play / Amazon / Other)
 
-Android only. Tells Tenjin which store the install came from. Default is
-`GooglePlay`.
+Tenjin supports three Android app-store values: `googleplay`, `amazon`, and
+`other` (for Huawei AppGallery and other stores). The plugin defaults the
+project to `googleplay` via `UTenjinSettings::AndroidAppStore`. To switch
+at runtime:
 
 ```cpp
 UFUNCTION(BlueprintCallable, Category = "Tenjin|Config")
@@ -452,6 +463,10 @@ static void SetAppStore(ETenjinAppStore Type);
 
 // ETenjinAppStore::GooglePlay | Amazon | Other
 ```
+
+> If you are publishing in an Android store other than Google Play, update
+> the value before calling `Connect()` so the install is attributed to the
+> right store.
 
 ## <a id="sample-app"></a>Sample app
 
@@ -463,19 +478,32 @@ cd Sample/TenjinSample
 open TenjinSample.uproject     # macOS — opens in Unreal Editor
 ```
 
-Set your API key under *Project Settings → Plugins → Tenjin SDK* (or paste
+Set your SDK key under *Project Settings → Plugins → Tenjin SDK* (or paste
 it into `Config/DefaultEngine.ini`) before tapping **Initialize**.
 
 For one-shot device testing the repo ships two helper scripts:
 
 ```bash
-./Scripts/test-ios.sh           # packages, opens Xcode for signing + Run
-./Scripts/test-android.sh       # packages, installs, launches, tails logcat
+./Scripts/test-ios.sh --deploy   # packages a signed .ipa + deploys + streams device console
+./Scripts/test-android.sh        # packages, installs, launches, tails logcat
 ```
 
 Both auto-locate Unreal under `/Users/Shared/Epic Games/UE_5.*` — set
 `UE_ROOT` if your install is elsewhere. Pass `--no-package` to skip the
-build step on repeat runs.
+build step on repeat runs. See [CONTRIBUTING.md](CONTRIBUTING.md#packaging)
+for the full flag set.
+
+## <a id="testing"></a>Testing
+
+You can verify your integration is working through Tenjin's
+[Live Test Device Data Tool][tenjin-sdk-diagnostics]. Add your
+`advertising_id` (Android) or `IDFA` (iOS) under
+*Support → [Test Devices][tenjin-test-devices]*, then send the test events
+from your app. You should see live events come in on the SDK Live page.
+
+The sample app's on-screen panel exercises every public method in
+`UTenjinBPLibrary`, so it's the fastest way to confirm Initialize +
+Connect + a custom event are flowing end-to-end.
 
 ## <a id="engine-support"></a>Engine version support
 
@@ -505,5 +533,9 @@ The Tenjin Unreal Engine SDK is licensed under the MIT License. See
 [LICENSE](LICENSE).
 
 [tenjin]: https://www.tenjin.com
-[tenjin-dashboard]: https://www.tenjin.com
+[tenjin-dashboard]: https://www.tenjin.com/dashboard/apps
+[tenjin-ios]: https://github.com/tenjin/tenjin-ios-sdk
+[tenjin-android]: https://github.com/tenjin/tenjin-android-sdk
+[tenjin-sdk-diagnostics]: https://www.tenjin.com/dashboard/sdk_diagnostics
+[tenjin-test-devices]: https://www.tenjin.com/dashboard/debug_app_users
 [thirdparty-readme]: TenjinSDK/ThirdParty/iOS/README.md

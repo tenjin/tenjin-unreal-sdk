@@ -227,6 +227,14 @@ public:
 	// serialised to a string). The native SDKs parse it.
 	// ------------------------------------------------------------------
 
+	// Only ad mediation platforms that ship an Unreal Engine plugin:
+	//   - AppLovin MAX → github.com/AppLovin/AppLovin-MAX-Unreal
+	//   - AdMob        → Google Mobile Ads (community/marketplace UE plugins)
+	//   - CAS          → github.com/cleveradssolutions/CAS-Unreal
+	// The other networks Tenjin supports natively (IronSource, HyperBid,
+	// TopOn, TradPlus, CloudX) ship only Unity SDKs, so passing impression
+	// JSON from a UE app isn't realistic — methods omitted.
+
 	UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
 	static void EventAdImpressionAdMob(const FString& JsonPayload);
 
@@ -234,14 +242,5 @@ public:
 	static void EventAdImpressionAppLovin(const FString& JsonPayload);
 
 	UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-	static void EventAdImpressionHyperBid(const FString& JsonPayload);
-
-	UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-	static void EventAdImpressionIronSource(const FString& JsonPayload);
-
-	UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-	static void EventAdImpressionTopOn(const FString& JsonPayload);
-
-	UFUNCTION(BlueprintCallable, Category = "Tenjin|ILRD")
-	static void EventAdImpressionTradPlus(const FString& JsonPayload);
+	static void EventAdImpressionCAS(const FString& JsonPayload);
 };

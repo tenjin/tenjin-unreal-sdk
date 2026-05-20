@@ -1,2 +1,13 @@
-# Auto detect text files and perform LF normalization
+# Auto-detect text files and perform LF normalization
 * text=auto
+
+# Native frameworks and libraries — force binary, never LF-normalize
+*.xcframework/** binary
+*.framework/**  binary
+*.dylib         binary
+*.a             binary
+*.so            binary
+*.aar           binary
+
+# Symbol files
+*.dSYM/**       binary

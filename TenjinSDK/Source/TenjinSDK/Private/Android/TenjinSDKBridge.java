@@ -185,24 +185,20 @@ public final class TenjinSDKBridge {
 
 	// ---- ILRD --------------------------------------------------------------
 
-	public static void eventAdImpressionAdMob(String json)      { sendImpression("adMob", json); }
-	public static void eventAdImpressionAppLovin(String json)   { sendImpression("appLovin", json); }
-	public static void eventAdImpressionHyperBid(String json)   { sendImpression("hyperBid", json); }
-	public static void eventAdImpressionIronSource(String json) { sendImpression("ironSource", json); }
-	public static void eventAdImpressionTopOn(String json)      { sendImpression("topOn", json); }
-	public static void eventAdImpressionTradPlus(String json)   { sendImpression("tradPlus", json); }
+	// Only ad mediation platforms that ship an Unreal Engine plugin (so the
+	// host app can realistically obtain the impression JSON to pass through).
+	public static void eventAdImpressionAdMob(String json)    { sendImpression("adMob", json); }
+	public static void eventAdImpressionAppLovin(String json) { sendImpression("appLovin", json); }
+	public static void eventAdImpressionCAS(String json)      { sendImpression("cas", json); }
 
 	private static void sendImpression(String network, String json) {
 		if (sInstance == null) return;
 		try {
 			JSONObject obj = new JSONObject(json);
 			switch (network) {
-				case "adMob":      sInstance.eventAdImpressionAdMob(obj); break;
-				case "appLovin":   sInstance.eventAdImpressionAppLovin(obj); break;
-				case "hyperBid":   sInstance.eventAdImpressionHyperBid(obj); break;
-				case "ironSource": sInstance.eventAdImpressionIronSource(obj); break;
-				case "topOn":      sInstance.eventAdImpressionTopOn(obj); break;
-				case "tradPlus":   sInstance.eventAdImpressionTradPlus(obj); break;
+				case "adMob":    sInstance.eventAdImpressionAdMob(obj); break;
+				case "appLovin": sInstance.eventAdImpressionAppLovin(obj); break;
+				case "cas":      sInstance.eventAdImpressionCAS(obj); break;
 			}
 		} catch (Throwable t) {
 			Log.w(TAG, "Failed to send " + network + " impression: " + t.getMessage());
