@@ -1,0 +1,64 @@
+# --- IDE / OS noise ---
+.vs/
+.DS_Store
+.idea/
+.vscode/
+
+# --- Compiled / linker output (any depth) ---
+*.slo
+*.lo
+*.o
+*.obj
+*.gch
+*.pch
+*.so
+*.dylib
+*.dll
+*.mod
+*.lai
+*.la
+*.a
+*.lib
+*.exe
+*.out
+*.app
+*.ipa
+*.apk
+*.aab
+
+# --- Engine-generated project files (any depth) ---
+*.xcodeproj
+*.xcworkspace
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# --- Unreal build artifacts (match at any depth — patterns without a leading
+# slash do NOT anchor to the repo root for trailing-slash directory names) ---
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+
+# --- Unreal Build/ — ignore platform subdirs but keep the *.ico icons and the
+# PakBlacklist*.txt files that ship with a project ---
+Build/
+!Build/*/
+Build/*/**
+!Build/*/PakBlacklist*.txt
+!Build/**/*.ico
+
+# Misc UE assets and source art
+*_BuiltData.uasset
+SourceArt/**/*.png
+SourceArt/**/*.tga
+
+# --- Bundled native dependencies (devs fetch via Scripts/install-ios-spm.sh) ---
+TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework/
+
+# --- Project-local config that should NOT be shared ---
+# (signing identities, API keys baked into ini, etc.)
+*.local.ini

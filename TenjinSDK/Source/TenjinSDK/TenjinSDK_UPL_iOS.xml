@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tenjin SDK iOS Unreal Plugin Language
+
+  Injects the AppTrackingTransparency usage description into Info.plist.
+  The string can be overridden per-project by editing Config/DefaultEngine.ini:
+
+    [/Script/IOSRuntimeSettings.IOSRuntimeSettings]
+    +AdditionalPlistData=(Key="NSUserTrackingUsageDescription",Value="Your message")
+-->
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+	<init>
+		<log text="Tenjin iOS plugin init"/>
+	</init>
+
+	<plistExtensions>
+		<insertValue value="
+			&lt;key&gt;NSUserTrackingUsageDescription&lt;/key&gt;
+			&lt;string&gt;This identifier will be used to deliver personalized ads to you.&lt;/string&gt;
+		"/>
+
+		<!--
+			SKAdNetwork identifiers (Tenjin's). Update from
+			https://github.com/tenjin/tenjin-ios-sdk#-skadnetwork as the
+			canonical list evolves.
+		-->
+		<insertValue value="
+			&lt;key&gt;SKAdNetworkItems&lt;/key&gt;
+			&lt;array&gt;
+				&lt;dict&gt;&lt;key&gt;SKAdNetworkIdentifier&lt;/key&gt;&lt;string&gt;22mmun2rn5.skadnetwork&lt;/string&gt;&lt;/dict&gt;
+				&lt;dict&gt;&lt;key&gt;SKAdNetworkIdentifier&lt;/key&gt;&lt;string&gt;4468km3ulz.skadnetwork&lt;/string&gt;&lt;/dict&gt;
+				&lt;dict&gt;&lt;key&gt;SKAdNetworkIdentifier&lt;/key&gt;&lt;string&gt;v9wttpbfk9.skadnetwork&lt;/string&gt;&lt;/dict&gt;
+				&lt;dict&gt;&lt;key&gt;SKAdNetworkIdentifier&lt;/key&gt;&lt;string&gt;n38lu8286q.skadnetwork&lt;/string&gt;&lt;/dict&gt;
+			&lt;/array&gt;
+		"/>
+	</plistExtensions>
+</root>

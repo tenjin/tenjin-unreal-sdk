@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tenjin SDK Android Unreal Plugin Language
+
+  Wires:
+    1. Maven Central dependency on com.tenjin:android-sdk
+    2. TenjinSDKBridge.java into the packaged APK
+    3. AD_ID & INTERNET permissions
+    4. Play Services / Install Referrer transitive deps via Tenjin's POM
+-->
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+	<init>
+		<log text="Tenjin Android plugin init"/>
+	</init>
+
+	<androidManifestUpdates>
+		<addPermission android:name="com.google.android.gms.permission.AD_ID"/>
+		<addPermission android:name="android.permission.INTERNET"/>
+		<addPermission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	</androidManifestUpdates>
+
+	<buildGradleAdditions>
+		<insert>
+			dependencies {
+				implementation 'com.tenjin:android-sdk:1.18.0'
+			}
+		</insert>
+	</buildGradleAdditions>
+
+	<gradleProperties>
+		<insert>
+			# Tenjin uses Maven Central; keep both google() and mavenCentral() in repos.
+		</insert>
+	</gradleProperties>
+
+	<resourceCopies>
+		<copyFile src="$S(PluginDir)/Private/Android/TenjinSDKBridge.java"
+		          dst="$S(BuildDir)/src/com/tenjin/unreal/TenjinSDKBridge.java"/>
+	</resourceCopies>
+
+	<gameActivityImportAdditions>
+		<insert>
+			import com.tenjin.unreal.TenjinSDKBridge;
+		</insert>
+	</gameActivityImportAdditions>
+
+	<!--
+		R8/ProGuard would otherwise strip the bridge class (loaded reflectively
+		via JNI FindClass) and the Tenjin SDK's listener callbacks in shipping
+		builds. Keep them all.
+	-->
+	<proguardAdditions>
+		<insert>
+			-keep class com.tenjin.unreal.TenjinSDKBridge { *; }
+			-keep class com.tenjin.android.** { *; }
+			-keep class com.tenjin.android.TenjinSDK$AttributionInfoCallback { *; }
+			-keep interface com.tenjin.android.TenjinSDK$* { *; }
+			-keepattributes Signature
+			-keepattributes *Annotation*
+		</insert>
+	</proguardAdditions>
+</root>
