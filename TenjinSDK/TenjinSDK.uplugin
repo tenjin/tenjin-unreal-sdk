@@ -1,0 +1,26 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Tenjin SDK",
+	"Description": "Tenjin is a unique growth infrastructure platform that helps you streamline your mobile marketing. This plugin exposes the Tenjin iOS and Android SDKs to Unreal Engine via C++ and Blueprints.",
+	"Category": "Analytics",
+	"CreatedBy": "Tenjin",
+	"CreatedByURL": "https://www.tenjin.com",
+	"DocsURL": "https://github.com/tenjin/tenjin-unreal-sdk",
+	"SupportURL": "support@tenjin.com",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "TenjinSDK",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"IOS",
+				"Android"
+			]
+		}
+	]
+}
