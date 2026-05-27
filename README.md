@@ -241,9 +241,10 @@ static void Subscription(const FString& ProductId,
                          const FString& AndroidDataSignature);
 ```
 
-iOS 15+ — fetches the latest StoreKit 2 transaction natively, then sends it
+iOS 16+ — fetches the latest StoreKit 2 transaction natively, then sends it
 to Tenjin. Use this when your IAP library (e.g. RevenueCat) doesn't expose
-SK2 data:
+SK2 data. (Tenjin's native `+subscriptionWithStoreKitForProductId:` is
+annotated `API_AVAILABLE(ios(16.0))`.)
 
 ```cpp
 UFUNCTION(BlueprintCallable, Category = "Tenjin|Transactions")

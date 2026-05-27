@@ -17,12 +17,6 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTenjinDeepLinkBroadcast, const FString&, JsonPayload);
 
 /**
- * Fired when the cached attribution info changes (typically on the first
- * fetch after Connect()). JSON payload — same shape as GetAttributionInfo().
- */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTenjinAttributionBroadcast, const FString&, JsonPayload);
-
-/**
  * Singleton object hosting BlueprintAssignable multicast delegates. Bind
  * once during BeginPlay (Blueprints) or module startup (C++) to receive
  * lifecycle events the SDK pushes asynchronously.
@@ -35,9 +29,6 @@ class TENJINSDK_API UTenjinDelegates : public UObject
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Tenjin|Events")
 	FTenjinDeepLinkBroadcast OnDeepLinkReceived;
-
-	UPROPERTY(BlueprintAssignable, Category = "Tenjin|Events")
-	FTenjinAttributionBroadcast OnAttributionInfo;
 
 	UFUNCTION(BlueprintPure, Category = "Tenjin")
 	static UTenjinDelegates* Get();

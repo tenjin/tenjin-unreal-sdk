@@ -161,7 +161,7 @@ public:
 		const FString& AndroidPurchaseData,
 		const FString& AndroidDataSignature);
 
-	/** iOS 15+ only. Fetches the latest StoreKit 2 transaction natively, then sends. */
+	/** iOS 16+ only. Fetches the latest StoreKit 2 transaction natively, then sends. */
 	UFUNCTION(BlueprintCallable, Category = "Tenjin|Transactions")
 	static void SubscriptionWithStoreKit(
 		const FString& ProductId,
