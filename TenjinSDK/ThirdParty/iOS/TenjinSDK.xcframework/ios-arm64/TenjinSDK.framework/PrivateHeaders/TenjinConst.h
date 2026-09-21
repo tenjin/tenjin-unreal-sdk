@@ -8,6 +8,7 @@
 #define kTenjinAdRevenueAppLovinEndpoint @"v0/ad_impressions/max"
 #define kTenjinAdRevenueIronSourceEndpoint @"v0/ad_impressions/ironsource"
 #define kTenjinAdRevenueCloudXEndpoint @"v0/ad_impressions/cloudx"
+#define kTenjinAdRevenueCustomEndpoint @"v0/ad_impressions"
 #define kTenjinHyperBidRevenueEndpoint @"v0/ad_impressions/hyperbid"
 #define kTenjinTopOnRevenueEndpoint @"v0/ad_impressions/topon"
 #define kTenjinCASRevenueEndpoint @"v0/ad_impressions/cas"
@@ -15,7 +16,7 @@
 #define kTenjinConversionEndpoint @"v0/conversion-values"
 
 //this line replaced by build script
-#define kTenjinTenjinSDKVersion @"1.17.0"
+#define kTenjinTenjinSDKVersion @"1.19.1"
 
 
 
@@ -28,6 +29,7 @@
 #define kTenjinAdvertisingId @"advertising_id"
 #define kTenjinVendorId @"developer_device_id"
 #define kTenjinGoogleODMInfo @"omd_info"
+#define kTenjinFirebaseAppInstanceId @"firebase_app_instance_id"
 #define kTenjinPlatform @"platform"
 #define kTenjinAppVersion @"app_version"
 #define kTenjinAppSubversion @"app_subversion"
@@ -48,6 +50,9 @@
 #define kTenjinPlugin @"plugin"
 #define kTenjinPluginVersion @"plugin_version"
 #define kTenjinEvent @"event"
+#define kTenjinOpenDeeplinkUrl @"open_deeplink_url"
+#define kTenjinOpenDeeplinkUrlMaxLength 4096
+#define kTenjinOpenDeeplinkRedeliveryWindow 10.0
 #define kTenjinAnalyticsId @"analytics_installation_id"
 #define kTenjinSDKAnalyticsMetrics @"sdk_analytics_metrics"
 

@@ -72,10 +72,10 @@ submodule. Releases are tagged on GitHub.
    * **iOS** — `TenjinSDK.xcframework` is committed under
      `Plugins/TenjinSDK/ThirdParty/iOS/` and linked via
      `PublicAdditionalFrameworks` in `Build.cs`. Bundled version is
-     **TenjinSDK 1.17.0**. To bump, replace the framework folder per
+     **TenjinSDK 1.19.1**. To bump, replace the framework folder per
      [`ThirdParty/iOS/README.md`][thirdparty-readme].
    * **Android** — the plugin's UPL XML injects
-     `implementation 'com.tenjin:android-sdk:1.18.0'` into the generated
+     `implementation 'com.tenjin:android-sdk:1.24.0'` into the generated
      Gradle build at package time; Gradle pulls from Maven Central during
      the build.
 

@@ -93,6 +93,17 @@ andDeferredDeeplink:(NSURL *)url
 //use connect to send connect call. sharedInstanceWithToken automatically does a connect
 + (void)connectWithDeferredDeeplink:(NSURL *)url;
 
+//report the deeplink URL the app was opened with for re-engagement attribution.
+//call from application:openURL:options: and continueUserActivity:, or the UISceneDelegate
+//equivalents (scene:openURLContexts:, scene:continueUserActivity: and, for cold starts,
+//connectionOptions in scene:willConnectToSession:options:). AppDelegate-only apps also get
+//cold launches captured automatically; scene-based apps must forward all cases.
++ (void)handleOpenURL:(NSURL *)url NS_SWIFT_NAME(handleOpenURL(_:));
+
+//raw-string variant of handleOpenURL for plugin wrappers (Unity, Flutter, React Native).
+//safe to call before initialization - the URL is cached and sent with the first connect
++ (void)handleOpenURLString:(NSString *)urlString NS_SWIFT_NAME(handleOpenURLString(_:));
+
 //use sendEventWithName for custom event names
 + (void)sendEventWithName:(NSString *)eventName;
 
@@ -246,3 +257,14 @@ andDeferredDeeplink:(NSURL *)url
 - (void)setGoogleDMAParametersWithAdPersonalization:(BOOL)adPersonalization adUserData:(BOOL)adUserData;
 
 @end
+
+// Impression Level Ad Revenue (ILRD) integrations
+#import <TenjinSDK/TenjinSDK+AdMobILRD.h>
+#import <TenjinSDK/TenjinSDK+AppLovinILRD.h>
+#import <TenjinSDK/TenjinSDK+CASILRD.h>
+#import <TenjinSDK/TenjinSDK+CloudXILRD.h>
+#import <TenjinSDK/TenjinSDK+CustomILRD.h>
+#import <TenjinSDK/TenjinSDK+HyperBidILRD.h>
+#import <TenjinSDK/TenjinSDK+IronSourceILRD.h>
+#import <TenjinSDK/TenjinSDK+TopOnILRD.h>
+#import <TenjinSDK/TenjinSDK+TradPlusILRD.h>
