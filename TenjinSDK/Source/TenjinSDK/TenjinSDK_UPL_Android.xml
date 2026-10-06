@@ -24,6 +24,14 @@
 			dependencies {
 				implementation 'com.tenjin:android-sdk:1.18.0'
 			}
+
+			// Tenjin's gson 2.13.x pulls error_prone_annotations 2.38.0, which crashes the
+			// R8 bundled with AGP 7.4.x (R8: java.lang.NullPointerException) in minified
+			// builds that also include common ad SDKs. 2.36.0+ all crash; 2.27.0 (what
+			// gson 2.11.0 uses) works. Annotations only, no runtime effect.
+			configurations.all {
+				resolutionStrategy.force 'com.google.errorprone:error_prone_annotations:2.27.0'
+			}
 		</insert>
 	</buildGradleAdditions>
 
