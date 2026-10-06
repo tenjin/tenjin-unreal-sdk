@@ -24,6 +24,15 @@
 			dependencies {
 				implementation 'com.tenjin:android-sdk:1.18.0'
 			}
+
+			// Tenjin's gson 2.13.x (Android SDK 1.17.0+) pulls error_prone_annotations 2.38.0,
+			// which crashes the D8/R8 bundled with AGP 7.x while dexing
+			// (D8: java.lang.NullPointerException). 2.36.0+ all crash; 2.28.0 works and is
+			// the version documented for Unity (TENJIN-27843). AGP 8 is unaffected.
+			// Compile-time annotations only, so forcing it has no runtime effect.
+			configurations.all {
+				resolutionStrategy.force 'com.google.errorprone:error_prone_annotations:2.28.0'
+			}
 		</insert>
 	</buildGradleAdditions>
 
