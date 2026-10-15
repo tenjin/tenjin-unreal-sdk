@@ -301,14 +301,20 @@ When upstream adds a method:
 
 ## <a id="releasing"></a>Releasing
 
-1. Bump the version in `TenjinSDK/TenjinSDK.uplugin` (`Version` and
-   `VersionName`).
-2. Bump the native SDK versions:
+The plugin has its own semantic version, independent of the native SDK
+versions it bundles (for example, plugin 1.1.0 ships iOS 1.19.1 and
+Android 1.24.0).
+
+1. Bump the version in `TenjinSDK/TenjinSDK.uplugin`: increment `Version`
+   by one and set `VersionName` to the new plugin version.
+2. Bump the native SDK versions, if needed:
    * Android: edit the `implementation 'com.tenjin:android-sdk:X.Y.Z'`
      line in `TenjinSDK/Source/TenjinSDK/TenjinSDK_UPL_Android.xml`.
    * iOS: replace `TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework/` with
      the new release (see `ThirdParty/iOS/README.md`) and verify a
      Sample build links.
-3. Tag the release on GitHub matching the underlying native SDK
-   `major.minor`.
+3. Add a `## [X.Y.Z] - YYYY-MM-DD` section to `CHANGELOG.md`, listing the
+   bundled native SDK versions and any plugin changes.
 4. Smoke-test the Sample app on at least one iOS and one Android device.
+5. After merging, tag the release on GitHub with the plugin
+   `VersionName` (e.g. `1.1.0`).
