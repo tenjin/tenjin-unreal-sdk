@@ -4,10 +4,10 @@
 //
 
 #import <SystemConfiguration/SystemConfiguration.h>
-#import "TenjinIAPHelper.h"
-#import "TenjinConfig.h"
-#import "PersistedFileStore.h"
-#import "DataStore.h"
+#import <TenjinSDK/TenjinIAPHelper.h>
+#import <TenjinSDK/TenjinConfig.h>
+#import <TenjinSDK/PersistedFileStore.h>
+#import <TenjinSDK/DataStore.h>
 
 @class SKPaymentTransaction;
 @class TJNHTTPClient;
@@ -27,6 +27,9 @@
 
 //TODO:move deferredDeeplink into attribution params
 @property(nonatomic, strong) NSString *deferredDeeplink;
+
+//launch URL the app was opened with, sent up as open_deeplink_url; cleared once delivered
+@property(atomic, copy) NSString *openDeeplinkUrl;
 
 @property int productQuantity;
 @property NSData *receipt;
@@ -63,6 +66,14 @@
 
 - (void)pingWithDeferredDeeplink:(NSURL *)url;
 
+- (void)handleOpenURL:(NSURL *)url NS_SWIFT_NAME(handleOpenURL(_:));
+
+- (void)handleOpenURLString:(NSString *)urlString NS_SWIFT_NAME(handleOpenURLString(_:));
+
+- (NSString *)claimOpenDeeplinkUrl;
+
+- (void)restoreOpenDeeplinkUrl:(NSString *)urlString;
+
 - (void)pingEventWithName:(NSString *)eventName;
 
 - (void)pingEventWithName:(NSString *)eventName
@@ -76,6 +87,9 @@
                       andUnitPrice:(NSDecimalNumber *)price;
 
 - (NSMutableDictionary *)deviceDataWithEvent:(NSString *)eventName;
+
+- (NSMutableDictionary *)deviceDataWithEvent:(NSString *)eventName
+                             openDeeplinkUrl:(NSString *)openDeeplinkUrl;
 
 - (void)optOut;
 

@@ -6,7 +6,7 @@ so cloning + building the plugin is one step — no fetch needed.
 
 ## Current bundled version
 
-The xcframework currently committed here is **TenjinSDK 1.17.0**.
+The xcframework currently committed here is **TenjinSDK 1.19.1**.
 
 ## Bumping the version
 

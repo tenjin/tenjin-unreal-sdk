@@ -140,7 +140,7 @@ Edit the Maven coordinate in `TenjinSDK/Source/TenjinSDK/TenjinSDK_UPL_Android.x
 <buildGradleAdditions>
   <insert>
     dependencies {
-      implementation 'com.tenjin:android-sdk:1.18.0'
+      implementation 'com.tenjin:android-sdk:1.24.0'
     }
   </insert>
 </buildGradleAdditions>

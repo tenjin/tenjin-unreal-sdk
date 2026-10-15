@@ -22,7 +22,7 @@
 	<buildGradleAdditions>
 		<insert>
 			dependencies {
-				implementation 'com.tenjin:android-sdk:1.18.0'
+				implementation 'com.tenjin:android-sdk:1.24.0'
 			}
 
 			// Tenjin's gson 2.13.x (Android SDK 1.17.0+) pulls error_prone_annotations 2.38.0,
