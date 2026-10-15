@@ -301,14 +301,26 @@ When upstream adds a method:
 
 ## <a id="releasing"></a>Releasing
 
-1. Bump the version in `TenjinSDK/TenjinSDK.uplugin` (`Version` and
-   `VersionName`).
-2. Bump the native SDK versions:
+Releases are automated with [release-please](https://github.com/googleapis/release-please).
+The plugin has its own semantic version, independent of the native SDK
+versions it bundles (for example, plugin 1.1.0 ships iOS 1.19.1 and
+Android 1.24.0).
+
+1. Use [Conventional Commits](https://www.conventionalcommits.org/) for PR
+   titles (`feat:`, `fix:`, `chore:`, `docs:`...); the PR title becomes the
+   squash commit. `feat:` bumps the minor version, `fix:` the patch, and
+   `chore:`/`docs:`/`build:` do not trigger a release.
+2. To ship new native SDK versions, open a `feat:` PR that bumps them:
    * Android: edit the `implementation 'com.tenjin:android-sdk:X.Y.Z'`
      line in `TenjinSDK/Source/TenjinSDK/TenjinSDK_UPL_Android.xml`.
    * iOS: replace `TenjinSDK/ThirdParty/iOS/TenjinSDK.xcframework/` with
      the new release (see `ThirdParty/iOS/README.md`) and verify a
      Sample build links.
-3. Tag the release on GitHub matching the underlying native SDK
-   `major.minor`.
-4. Smoke-test the Sample app on at least one iOS and one Android device.
+3. After merging to `main`, release-please opens (or updates) a
+   `chore(main): release X.Y.Z` PR. It updates `CHANGELOG.md` and
+   `VersionName` in `TenjinSDK/TenjinSDK.uplugin`, and a follow-up job
+   bumps the integer `Version` in the same PR.
+4. Smoke-test the Sample app from the release PR branch on at least one
+   iOS and one Android device.
+5. Merge the release PR. release-please tags `X.Y.Z` and creates the
+   GitHub release.
